@@ -1,0 +1,28 @@
+
+message NameInfo
+{
+	required uint32 uid  = 1;
+    required string name = 2;
+    optional bool noused = 3[default = false];  //是否已经废弃
+}
+
+message AddNameReq
+{
+	required uint32 uid  = 1;
+	required string name = 2;
+}
+message AddNameRsp
+{
+    required int32 ret   = 1;
+}
+
+message DelNameReq
+{
+	required uint32 uid  = 1;
+	required string name = 2;
+}
+message DelNameRsp
+{
+	required int32 ret   = 1;
+}
+
