@@ -5,11 +5,10 @@ FLAGS=
 
 LIBNAME=libproto.a
 
-all:genpb $(OBJS) lib
-genpb:
-	protoc --cpp_out=. *.proto
-	protoc --python_out=. *.proto
-%.o:%.cpp
+
+all:$(OBJS) lib
+
+%.o:%.cc
 	g++ -fPIC ${INCLUDE} $< ${FLAGS} -c -o $@
 
 lib:
