@@ -36,12 +36,12 @@ def ReqAndRsp(SVR_ADDR, CMD, REQ, RSP):
 	#print repr(send_buf)
 
 	#3. send&recv data
-	print ("REQ:cmd=%d,body_size=%d|req=%s" %(CMD, len(send_buf), str(REQ)))
+	print ("[REQ:cmd=%d,body_size=%d] req=%s" %(CMD, len(send_buf), str(REQ)))
 	recv_buf = SendAndRecvData(SVR_ADDR, send_buf)
 	MAGIC_NUM_,BODY_SIZE_,CMD_=struct.unpack("!4s2i", recv_buf[0:12]);
 	#4. unserialize
 	RSP.ParseFromString(recv_buf[12:])
-	print("RSP:magic_num=%s,cmd=%d,body_size=%d|rsp=%s" %(MAGIC_NUM_, CMD_, BODY_SIZE_, str(RSP)))
+	print("[RSP:magic=%s,cmd=%d,body_size=%d] rsp=%s" %(MAGIC_NUM_, CMD_, BODY_SIZE_, str(RSP)))
 
 	return RSP
 
