@@ -20,7 +20,7 @@ int LogicSvr::OnInit(ConfReader *config)
     return 0;
 }
 
-bool LogicSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size)
+bool LogicSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
     if(!HAS_HANDLE(cmd))
     {
@@ -28,11 +28,11 @@ bool LogicSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_da
         
         //return false;
         //由父类来处理
-        return TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size);
+        return TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size, tid);
     }
 
     HANLDER_PTR handler = GET_HANDLE(cmd);
-    int ret = (this->*handler)(session, packet_data, head_size, body_size);
+    int ret = (this->*handler)(session, packet_data, head_size, body_size, tid);
     return ret==0?true:false;
 }
 
