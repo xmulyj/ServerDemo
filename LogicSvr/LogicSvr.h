@@ -20,11 +20,11 @@ public:
     LogicSvr(ConfReader *conf):TCPServer(conf){}
 protected:
     int OnInit(ConfReader *config);
-    bool OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size);
+    bool OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
 private:
     //handler类型定义
-    typedef int HANDLER_TYPE(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size);
-    typedef int (LogicSvr::*HANLDER_PTR)(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size);
+    typedef int HANDLER_TYPE(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
+    typedef int (LogicSvr::*HANLDER_PTR)(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
     DEF_HANDLE(uint32_t, HANLDER_PTR);
     //handler 方法
 private:
