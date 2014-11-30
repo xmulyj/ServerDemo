@@ -11,11 +11,11 @@
 
 int main()
 {
-    INIT_LOGGER("./conf/log4cplus.conf");
+    INIT_LOGGER("../conf/log4cplus.conf");
 
 
     ConfReader conf;
-    if(conf.Init("./conf/server.conf") != 0)
+    if(conf.Init("../conf/server.conf") != 0)
         return -1;
 
     NameSvr server(&conf);

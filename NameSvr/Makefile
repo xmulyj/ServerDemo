@@ -5,10 +5,10 @@ LIBS=-llog4cplus -lpthread -lrt -lprotobuf
 LIBS_MY=-lenet ../protocol_define/libproto.a
 CFLAGS=-g -D__LOG4CPLUS__
 
-all:NameSvr
+all:bin/NameSvr
 
-NameSvr:Main.cpp NameSvr.cpp *.h
+bin/NameSvr:Main.cpp NameSvr.cpp *.h
 	g++ Main.cpp NameSvr.cpp ${INCLUDE} ${LIBS} ${LIBS_MY} ${CFLAGS} -o $@
 
 clean:
-	rm NameSvr
+	rm bin/NameSvr

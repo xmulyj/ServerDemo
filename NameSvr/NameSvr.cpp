@@ -3,6 +3,9 @@
  *
  *  Created on: Nov 22, 2014
  *      Author: young
+ *
+ *  POWERED BY ENET
+ *  E-MAIL: xmulyj@gmail.com
  */
 
 #include "NameSvr.h"
