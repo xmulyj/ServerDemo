@@ -2,6 +2,14 @@
 .cproject
 *.a
 *.o
-NameSvr
-LogicSvr
-AccessSvr
+
+LogicSvr/bin/*
+LogicSvr/log/*
+
+NameSvr/bin/*
+NameSvr/log/*
+
+AccessSvr/bin/*
+AccessSvr/log/*
+
+
