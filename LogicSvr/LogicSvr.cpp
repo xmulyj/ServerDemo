@@ -23,7 +23,7 @@ int LogicSvr::OnInit(ConfReader *config)
 {
     //添加CmdID对应的handler
     HANDLE_CLASS(LogicSvr)
-    HANDLE_CMD(CMD_EXAMPLE_ID, OnRegister)
+    HANDLE_CMD(CMD_REGISTER_REQ, OnRegister)
     HANDLE_CMD(CMD_ADD_NAME_RSP, OnAddNameRsp)
     //从这里添加其他handler
     HANDLE_CLASS_END
@@ -61,11 +61,30 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
     AddNameReq add_name_req;
     add_name_req.set_uid(register_req.uid());
     add_name_req.set_name(register_req.name());
-    SendToSvr(this, CMD_ADD_NAME_REQ, &add_name_req, tid);
+    int ret = SendToSvr(this, CMD_ADD_NAME_REQ, &add_name_req, tid);
+    if(ret != 0)
+    {
+        LOG_ERROR(logger, "OnRegister:send AddNameReq failed.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
+        return -1;
+    }
+
+    if(SaveTractionSession(tid, session) == false)
+    {
+        LOG_ERROR(logger, "OnRegister:save traction session failed.tid="<<tid);
+        return -1;
+    }
     return 0;
 }
+
 int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
+    TCPSession *rsp_session = GetTractionSession(tid, true);  //获取tid对应的session(true:并删除掉该事务)
+    if(rsp_session == NULL)
+    {
+        LOG_WARN(logger, "OnAddNameRsp:get traction session failed.tid="<<tid);
+        return -1;
+    }
+
     AddNameRsp add_name_rsp;
     if(add_name_rsp.ParseFromArray(data+head_size, body_size) == false)
     {
@@ -74,9 +93,19 @@ int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_
     }
     LOG_DEBUG(logger, "OnAddNameRsp:tid="<<tid<<",rsp="<<add_name_rsp.ShortDebugString());
 
+    //回包
     RegisterRsp register_rsp;
     register_rsp.set_ret(add_name_rsp.ret());
-    //TODO 回包
+    int ret = SendToSvr((SessionDefault*)rsp_session, CMD_REGISTER_RSP, &register_rsp);
+    if(ret != 0)
+    {
+        LOG_WARN(logger, "OnAddNameRsp:send RegisterRsp failed.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());
+    }
+    else
+    {
+        LOG_DEBUG(logger, "OnAddNameRsp:send RegisterRsp succ.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());
+    }
+
     return 0;
 }
 
