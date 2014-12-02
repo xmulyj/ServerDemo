@@ -9,7 +9,7 @@
  */
 
 #include "NameSvr.h"
-#include "Name.pb.h"
+#include "NameSvr.pb.h"
 #include "ErrorCode.h"
 
 IMPL_LOGGER(NameSvr, logger);
@@ -29,9 +29,7 @@ bool NameSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_dat
 {
     if(!HAS_HANDLE(cmd))
     {
-        //LOG_ERROR(logger, "can't find handler for cmd="<<cmd<<".fd="<<fd);
-        
-        //return false;
+        LOG_WARN(logger, "can't find handler for cmd="<<cmd<<".fd="<<session->GetFD());
         //由父类来处理
         return TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size, tid);
     }
@@ -51,7 +49,7 @@ int NameSvr::OnAddNameReq(TCPSession *session, const char *data, uint32_t head_s
         LOG_WARN(logger, "OnAddNameReq:parse req failed.");
         return ERR_FAILED;
     }
-    LOG_DEBUG(logger, "OnAddNameReq:req="<<add_name_req.ShortDebugString());
+    LOG_DEBUG(logger, "OnAddNameReq:tid="<<tid<<",req="<<add_name_req.ShortDebugString());
     add_name_rsp.set_ret(0);
 
     int ret = SendToSvr((SessionDefault*)session, CMD_ADD_NAME_RSP, &add_name_rsp);

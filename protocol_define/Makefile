@@ -15,4 +15,4 @@ lib:
 	ar -cr ${LIBNAME} $(OBJS)
 	
 clean:
-	rm libproto.a *.o *.cc *.h *.py
+	rm libproto.a *.o *.cc *.h *.py *.pyc

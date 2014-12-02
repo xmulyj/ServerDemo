@@ -17,13 +17,14 @@ using namespace ::google::protobuf;
 class CommonSend
 {
 public:
-    int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg);
-    int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg);
-    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type);
+    int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid=0);
+    int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid=0);
+    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid=0);
+    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid=0); //直接按cmd号路由
 };
 
 inline
-int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg)
+int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid/*=0*/)
 {
     if(session == NULL)
         return -1;
@@ -36,7 +37,7 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg)
     {
         return -2;
     }
-    int head_size = packet->SetHead(buffer, 100, body_size, cmd);
+    int head_size = packet->SetHead(buffer, 100, body_size, cmd, &tid);
     if(head_size <= 0)
         return -3;
     msg->SerializePartialToArray(buffer+head_size, body_size);
@@ -46,20 +47,26 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg)
 }
 
 inline
-int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg)
+int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid/*=0*/)
 {
     //获取会话和byte buffer
     SessionMgr *session_mgr = server->GetInternalSessionMgr();
     SessionDefault *session = dynamic_cast<SessionDefault*>(session_mgr->FindSession(fd));
-    return SendToSvr(session, cmd, msg);
+    return SendToSvr(session, cmd, msg, tid);
 }
 
 inline
-int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type)
+int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid/*=0*/)
 {
     //获取会话和byte buffer
     SessionDefault *session = server->GetSvrSession((TCPServer*)server, svr_id, route_type);
-    return SendToSvr(session, cmd, msg);
+    return SendToSvr(session, cmd, msg, tid);
 }
 
+inline
+int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid=0) //直接按cmd号路由
+{
+    SessionDefault *session = server->GetSvrSession((TCPServer*)server, cmd);
+    return SendToSvr(session, cmd, msg, tid);
+}
 #endif /* COMMONSEND_H_ */

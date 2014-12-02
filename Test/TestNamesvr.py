@@ -7,15 +7,15 @@ path.append("../protocol_define")
 path.append("./")
 
 from Common import *
-import Name_pb2
+import NameSvr_pb2
 
 SVR_ADDR=("127.0.0.1",3005)
 
 def Test_AddName():
 	print "[Test_AddName]"
 	CMD = 5001
-	REQ = Name_pb2.AddNameReq()
-	RSP = Name_pb2.AddNameRsp()
+	REQ = NameSvr_pb2.AddNameReq()
+	RSP = NameSvr_pb2.AddNameRsp()
 	
 	REQ.uid=10000
 	REQ.name="TestName"
@@ -25,8 +25,8 @@ def Test_AddName():
 def Test_DelName():
 	print "[Test_DelName]"
 	CMD = 5003
-	REQ = Name_pb2.DelNameReq()                                                
-	RSP = Name_pb2.DelNameRsp()
+	REQ = NameSvr_pb2.DelNameReq()                                                
+	RSP = NameSvr_pb2.DelNameRsp()
 
 	REQ.uid=10000
 	REQ.name="TestName"

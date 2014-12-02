@@ -14,11 +14,10 @@
 #include "enet/ENet.h"
 using namespace enet;
 
-#include <map>
-using std::map;
+#include "CmdID.h"
+#include "CommonSend.h"
 
-
-class LogicSvr:public TCPServer, public TCPServerRoute
+class LogicSvr:public TCPServer, public TCPServerRoute, public CommonSend
 {
 public:
     LogicSvr(ConfReader *conf):TCPServer(conf){}
@@ -38,7 +37,8 @@ private:
     typedef int (LogicSvr::*HANLDER_PTR)(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
     DEF_HANDLE(uint32_t/*cmd ID*/, HANLDER_PTR);
     // 声明handler方法
-    HANLDER_TYPE OnExample;
+    HANLDER_TYPE OnRegister;
+    HANLDER_TYPE OnAddNameRsp;
 
 private:
     DECL_LOGGER(logger);

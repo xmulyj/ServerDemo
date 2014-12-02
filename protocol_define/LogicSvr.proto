@@ -1,0 +1,10 @@
+message RegisterReq
+{
+	required uint32 uid =1;
+	required string name =2;
+}
+
+message RegisterRsp
+{
+	optional int32 ret = 1;
+}
