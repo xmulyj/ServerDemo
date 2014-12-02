@@ -21,6 +21,13 @@ IMPL_LOGGER(LogicSvr, logger);
 
 int LogicSvr::OnInit(ConfReader *config)
 {
+    int ret = LoadRouteConf();
+    if(ret != 0)
+    {
+        LOG_WARN(logger, "OnInit:load route conf failed.ret="<<ret);
+        return -1;
+    }
+    
     //添加CmdID对应的handler
     HANDLE_CLASS(LogicSvr)
     HANDLE_CMD(CMD_REGISTER_REQ, OnRegister)
