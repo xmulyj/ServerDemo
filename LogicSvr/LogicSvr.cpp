@@ -21,12 +21,22 @@ IMPL_LOGGER(LogicSvr, logger);
 
 int LogicSvr::OnInit(ConfReader *config)
 {
-    int ret = LoadRouteConf();
-    if(ret != 0)
+//需要路由功能的话请设置为1
+#if 1    //路由规则
+    string conf_route_file;
+    config->GetValue("TCP_SERVER", "route_conf", conf_route_file);
+    if(conf_route_file == "")
     {
-        LOG_WARN(logger, "OnInit:load route conf failed.ret="<<ret);
+        LOG_ERROR(logger, "OnInit:[TCP_SERVER]route_conf not set");
         return -1;
     }
+    int ret = LoadRouteConf(conf_route_file.c_str());
+    if(ret != 0)
+    {
+        LOG_ERROR(logger, "OnInit:LoadRouteConf failed.ret="<<ret);
+        return -1;
+    }
+#endif
     
     //添加CmdID对应的handler
     HANDLE_CLASS(LogicSvr)
