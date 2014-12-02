@@ -33,7 +33,7 @@ public:
 };
 
 inline
-int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid/*=0*/)
+int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
 {
     if(session == NULL)
         return -1;
@@ -56,7 +56,7 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, u
 }
 
 inline
-int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid/*=0*/)
+int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid)
 {
     //获取会话和byte buffer
     SessionMgr *session_mgr = server->GetInternalSessionMgr();
@@ -65,7 +65,7 @@ int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg,
 }
 
 inline
-int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid/*=0*/)
+int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
 {
     //获取会话和byte buffer
     SessionDefault *session = server->GetSvrSession((TCPServer*)server, svr_id, route_type);
