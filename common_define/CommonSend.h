@@ -17,10 +17,19 @@ using namespace ::google::protobuf;
 class CommonSend
 {
 public:
-    int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid=0);
-    int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid=0);
-    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid=0);
-    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid=0); //直接按cmd号路由
+    int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
+    int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid);
+    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
+
+    int ReqSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid)  //直接按cmd路由
+    {
+        SessionDefault *session = server->GetSvrSession((TCPServer*)server, cmd);
+        return SendToSvr(session, cmd, msg, tid);
+    }
+    int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
+    {
+        return SendToSvr(session, cmd, msg, tid);
+    }
 };
 
 inline
@@ -63,10 +72,4 @@ int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, ui
     return SendToSvr(session, cmd, msg, tid);
 }
 
-inline
-int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid=0) //直接按cmd号路由
-{
-    SessionDefault *session = server->GetSvrSession((TCPServer*)server, cmd);
-    return SendToSvr(session, cmd, msg, tid);
-}
 #endif /* COMMONSEND_H_ */
