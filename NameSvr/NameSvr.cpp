@@ -16,6 +16,13 @@ IMPL_LOGGER(NameSvr, logger);
 
 int NameSvr::OnInit(ConfReader *config)
 {
+    int ret = LoadRouteConf();
+    if(ret != 0)
+    {
+    LOG_WARN(logger, "OnInit:load route conf failed.ret="<<ret);
+    return -1;
+    }
+
     //4. 注册cmd处理方法
     HANDLE_CLASS(NameSvr)
     HANDLE_CMD(CMD_ADD_NAME_REQ, OnAddNameReq)
