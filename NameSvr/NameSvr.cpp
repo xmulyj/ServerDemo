@@ -52,7 +52,7 @@ int NameSvr::OnAddNameReq(TCPSession *session, const char *data, uint32_t head_s
     LOG_DEBUG(logger, "OnAddNameReq:tid="<<tid<<",req="<<add_name_req.ShortDebugString());
     add_name_rsp.set_ret(0);
 
-    int ret = SendToSvr((SessionDefault*)session, CMD_ADD_NAME_RSP, &add_name_rsp);
+    int ret = RspSvr((SessionDefault*)session, CMD_ADD_NAME_RSP, &add_name_rsp);
     if(ret != 0)
     {
         LOG_WARN(logger, "OnAddNameReq:send rsp failed.ret="<<ret<<",rsp="<<add_name_rsp.ShortDebugString());
@@ -76,7 +76,7 @@ int NameSvr::OnDelNameReq(TCPSession *session, const char *data, uint32_t head_s
     }
     del_name_rsp.set_ret(0);
 
-    int ret = SendToSvr((SessionDefault*)session, CMD_DEL_NAME_RSP, &del_name_rsp);
+    int ret = RspSvr((SessionDefault*)session, CMD_DEL_NAME_RSP, &del_name_rsp);
     if(ret != 0)
     {
         LOG_WARN(logger, "OnDelNameReq:send rsp failed.ret="<<ret<<",rsp="<<del_name_rsp.ShortDebugString());
