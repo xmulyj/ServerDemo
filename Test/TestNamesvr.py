@@ -13,7 +13,7 @@ SVR_ADDR=("127.0.0.1",3005)
 
 def Test_AddName():
 	print "[Test_AddName]"
-	CMD = 5001
+	CMD = 3001
 	REQ = NameSvr_pb2.AddNameReq()
 	RSP = NameSvr_pb2.AddNameRsp()
 	
@@ -24,7 +24,7 @@ def Test_AddName():
 
 def Test_DelName():
 	print "[Test_DelName]"
-	CMD = 5003
+	CMD = 3003
 	REQ = NameSvr_pb2.DelNameReq()                                                
 	RSP = NameSvr_pb2.DelNameRsp()
 
