@@ -40,9 +40,11 @@ int LogicSvr::OnInit(ConfReader *config)
     
     //添加CmdID对应的handler
     HANDLE_CLASS(LogicSvr)
+    //注册
     HANDLE_CMD(CMD_REGISTER_REQ, OnRegister)
     HANDLE_CMD(CMD_ADD_NAME_RSP, OnAddNameRsp)
-    //从这里添加其他handler
+
+	//
     HANDLE_CLASS_END
 
 
