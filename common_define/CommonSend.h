@@ -19,11 +19,11 @@ class CommonSend
 public:
     int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
     int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid);
-    int SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
+    int SendToSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
 
-    int ReqSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint64_t tid)  //直接按cmd路由
+    int ReqSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid)  //直接按cmd路由
     {
-        SessionDefault *session = server->GetSvrSession((TCPServer*)server, cmd);
+        SessionDefault *session = route_server->GetSvrSession(tcp_server, cmd);
         return SendToSvr(session, cmd, msg, tid);
     }
     int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
@@ -65,10 +65,10 @@ int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg,
 }
 
 inline
-int CommonSend::SendToSvr(TCPServerRoute *server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
+int CommonSend::SendToSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
 {
     //获取会话和byte buffer
-    SessionDefault *session = server->GetSvrSession((TCPServer*)server, svr_id, route_type);
+    SessionDefault *session = route_server->GetSvrSession(tcp_server, svr_id, route_type);
     return SendToSvr(session, cmd, msg, tid);
 }
 

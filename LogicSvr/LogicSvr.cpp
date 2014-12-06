@@ -57,7 +57,7 @@ bool LogicSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_da
 {
     if(!HAS_HANDLE(cmd))
     {
-        LOG_WARN(logger, "can't find handler for cmd="<<cmd<<".fd="<<session->GetFD());
+        LOG_DEBUG(logger, "can't find handler for cmd="<<cmd<<".fd="<<session->GetFD());
         //由父类来处理
         return TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size, tid);
     }
@@ -75,16 +75,21 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
         LOG_WARN(logger, "OnRegister:parse req failed.");
         return ERR_FAILED;
     }
-    LOG_DEBUG(logger, "OnRegister:tid="<<tid<<",req="<<register_req.ShortDebugString());
+    LOG_INFO(logger, "OnRegister:tid="<<tid<<",req="<<register_req.ShortDebugString());
 
     AddNameReq add_name_req;
     add_name_req.set_uid(register_req.uid());
     add_name_req.set_name(register_req.name());
-    int ret = ReqSvr(this, CMD_ADD_NAME_REQ, &add_name_req, tid);
+
+    int ret = ReqSvr(this, this, CMD_ADD_NAME_REQ, &add_name_req, tid);
     if(ret != 0)
     {
         LOG_ERROR(logger, "OnRegister:send AddNameReq failed.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
         return -1;
+    }
+    else
+    {
+    	LOG_DEBUG(logger, "OnRegister:send AddNameReq succ.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
     }
 
     if(SaveTractionSession(tid, session) == false)
@@ -110,7 +115,7 @@ int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_
         LOG_WARN(logger, "OnAddNameRsp:parse req failed.");
         return ERR_FAILED;
     }
-    LOG_DEBUG(logger, "OnAddNameRsp:tid="<<tid<<",rsp="<<add_name_rsp.ShortDebugString());
+    LOG_INFO(logger, "OnAddNameRsp:tid="<<tid<<",rsp="<<add_name_rsp.ShortDebugString());
 
     //回包
     RegisterRsp register_rsp;
@@ -122,7 +127,7 @@ int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_
     }
     else
     {
-        LOG_DEBUG(logger, "OnAddNameRsp:send RegisterRsp succ.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());
+        LOG_INFO(logger, "OnAddNameRsp:send RegisterRsp succ.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());
     }
 
     return 0;

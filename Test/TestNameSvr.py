@@ -9,7 +9,7 @@ path.append("./")
 from Common import *
 import NameSvr_pb2
 
-SVR_ADDR=("127.0.0.1",3005)
+SVR_ADDR=("127.0.0.1",3003)
 
 def Test_AddName():
 	print "[Test_AddName]"
