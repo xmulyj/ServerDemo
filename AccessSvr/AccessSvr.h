@@ -17,14 +17,31 @@ using namespace enet;
 #include <map>
 using std::map;
 
+#include "AccessSvrConf.h"
+
+class ClientTCPSession:public SessionDefault
+{
+protected:
+    // @override
+    bool OnPacket(uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
+};
 
 class AccessSvr:public TCPServer, public TCPServerRoute
 {
+friend class ClientTCPSession;
 public:
-    AccessSvr(ConfReader *conf):TCPServer(conf){}
+    AccessSvr(ConfReader *tcp_conf, ConfReader *access_conf):TCPServer(tcp_conf)
+		,m_conf_reader(access_conf)
+		,m_listen_fd(-1)
+	{
+	}
+
 protected:
     int OnInit(ConfReader *config);
     bool OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
+
+    //转发客户端请求
+    bool OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
 private:
     // CmdID的处理方法类型定义
     //   session: 请求的会话信息(即代表一个连接)
@@ -38,11 +55,27 @@ private:
     typedef int (AccessSvr::*HANLDER_PTR)(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
     DEF_HANDLE(uint32_t/*cmd ID*/, HANLDER_PTR);
     // 声明handler方法
-    HANLDER_TYPE OnExample;
-
+    //HANLDER_TYPE OnExample;
+private:
+    ConfReader *m_conf_reader;
+    AccessSvrConf m_conf;
+    int m_listen_fd;
+    SessionAcceptor m_acceptor;
+    SessionMgrDefault<ClientTCPSession> m_client_session_mgr;
+    int InitClientSessionMgr();
+    int DoListen();
 private:
     DECL_LOGGER(logger);
 };
+
+//TCPSession
+inline
+bool ClientTCPSession::OnPacket(uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
+{
+	AccessSvr* tcp_server = (AccessSvr*)GetUserData();
+    assert(tcp_server != NULL);
+    return tcp_server->OnClientPacket(this, cmd, packet_data, head_size, body_size, tid);
+}
 
 #endif /* _ACCESSSVR_H_ */
 
