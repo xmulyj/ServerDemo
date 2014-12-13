@@ -81,7 +81,7 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
     add_name_req.set_uid(register_req.uid());
     add_name_req.set_name(register_req.name());
 
-    int ret = ReqSvr(this, this, CMD_ADD_NAME_REQ, &add_name_req, tid, TRACTION_SAVE);
+    int ret = ReqSvr(this, this, CMD_ADD_NAME_REQ, &add_name_req, tid, session);
     if(ret != 0)
     {
         LOG_ERROR(logger, "OnRegister:send AddNameReq failed.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
