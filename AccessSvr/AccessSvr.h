@@ -24,15 +24,15 @@ class ClientTCPSession:public SessionDefault
 protected:
     // @override
     bool OnPacket(uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
+    // @override
+    IOStatus OnError(int fd, uint64_t now_ms); //请不要close掉fd,框架会close的.切记切记!!!
 };
 
 class AccessSvr:public TCPServer, public TCPServerRoute
 {
 friend class ClientTCPSession;
 public:
-    AccessSvr(ConfReader *tcp_conf, ConfReader *access_conf):TCPServer(tcp_conf)
-		,m_conf_reader(access_conf)
-		,m_listen_fd(-1)
+    AccessSvr(ConfReader *conf):TCPServer(conf)
 	{
 	}
 
@@ -42,6 +42,7 @@ protected:
 
     //转发客户端请求
     bool OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
+    IOStatus OnClientError(ClientTCPSession *session, uint64_t now_ms);
 private:
     // CmdID的处理方法类型定义
     //   session: 请求的会话信息(即代表一个连接)
@@ -57,13 +58,8 @@ private:
     // 声明handler方法
     //HANLDER_TYPE OnExample;
 private:
-    ConfReader *m_conf_reader;
-    AccessSvrConf m_conf;
-    int m_listen_fd;
-    SessionAcceptor m_acceptor;
     SessionMgrDefault<ClientTCPSession> m_client_session_mgr;
-    int InitClientSessionMgr();
-    int DoListen();
+    void OnListenSucc(ListenInfo &listen_info);
 private:
     DECL_LOGGER(logger);
 };
@@ -75,6 +71,15 @@ bool ClientTCPSession::OnPacket(uint32_t cmd, const char *packet_data, uint32_t 
 	AccessSvr* tcp_server = (AccessSvr*)GetUserData();
     assert(tcp_server != NULL);
     return tcp_server->OnClientPacket(this, cmd, packet_data, head_size, body_size, tid);
+}
+
+inline
+IOStatus ClientTCPSession::OnError(int fd, uint64_t now_ms)
+{
+	AccessSvr* access_server = (AccessSvr*)GetUserData();
+    assert(access_server != NULL);
+    access_server->OnClientError(this, now_ms);
+    return SessionDefault::OnError(fd, now_ms);
 }
 
 #endif /* _ACCESSSVR_H_ */

@@ -20,6 +20,23 @@ static HttpPacket gHttpPack;
 
 int AccessSvr::OnInit(ConfReader *config)
 {
+//需要路由功能的话请设置为1
+#if 1    //路由规则
+	string conf_route_file;
+	config->GetValue("TCP_SERVER", "route_conf", conf_route_file);
+	if(conf_route_file == "")
+	{
+		LOG_ERROR(logger, "OnInit:[TCP_SERVER]route_conf not set");
+		return -1;
+	}
+	int ret = LoadRouteConf(conf_route_file.c_str());
+	if(ret != 0)
+	{
+		LOG_ERROR(logger, "OnInit:LoadRouteConf failed.ret="<<ret);
+		return -1;
+	}
+#endif
+
 	//添加CmdID对应的handler
     HANDLE_CLASS(AccessSvr)
     //HANDLE_CMD(CMD_EXAMPLE_ID, OnExample)
@@ -28,22 +45,6 @@ int AccessSvr::OnInit(ConfReader *config)
 
 
     //添加其他初始化内容
-	int ret = 0;
-	if((ret=m_conf.Init(m_conf_reader)) != 0)
-	{
-		LOG_ERROR(logger, "AccessSvr:AccessSvrConf Init failed.ret="<<ret);
-		return -1;
-	}
-
-	if((ret=InitClientSessionMgr()) != 0)
-	{
-		return -1;
-	}
-
-	if((ret=DoListen()) != 0)
-	{
-		return -1;
-	}
 
     return 0;
 }
@@ -68,56 +69,18 @@ bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_d
 //    return 0;
 //}
 
-int AccessSvr::InitClientSessionMgr()
+void AccessSvr::OnListenSucc(ListenInfo &listen_info)
 {
-    //初始化session mgr的参数
-    if(m_conf.conf_pack_type == 1)  //bin
-    {
-        LOG_INFO(logger, "AccessSvr:use Binary packet.");
-        m_client_session_mgr.SetPacket(&gBinPacket);                     //打包器
-    }
-    else if(m_conf.conf_pack_type == 2)  //http
-    {
-        LOG_INFO(logger, "AccessSvr:use Http packet.");
-        m_client_session_mgr.SetPacket(&gHttpPack);                     //打包器
-    }
+    //listen id=0内部使用
+    int listen_id = listen_info.id;
+    TCPServerConf &tcp_conf = GetTCPConf();
+    const ConfSessionParam *client_listen_param = tcp_conf.GetListenParam(listen_id);
+    Packet *packet = GetInternalPacket();
+    assert(client_listen_param!=NULL && packet!=NULL);
 
-	m_client_session_mgr.SetMaxSession(m_conf.conf_session_max_num);         //最大连接数
-	m_client_session_mgr.SetBlock((m_conf.conf_session_block?false:true));   //阻塞模式
-	m_client_session_mgr.SetRecvTimeout(m_conf.conf_session_recv_timeout);   //接收超时时间
-	m_client_session_mgr.SetSendTimeout(m_conf.conf_session_send_timeout);   //发送超时时间
-	m_client_session_mgr.SetMaxRecvSize(m_conf.conf_session_max_recv_size);  //最多接收缓冲区
-	m_client_session_mgr.SetMaxSendSize(m_conf.conf_session_max_send_size);  //最大发送缓冲区
-	m_client_session_mgr.SetUserData((void*)this);                           //用户数据
-    if(m_client_session_mgr.CreateSession() == false)
-    {
-        LOG_ERROR(logger, "AccessSvr:init client session mgr failed");
-        return -1;
-    }
-	return 0;
-}
-
-int AccessSvr::DoListen()
-{
-	if(m_conf.conf_listen <= 0)
-	{
-		LOG_ERROR(logger, "AccessSvr:listen num = 0");
-		return -1;
-	}
-
-	int fd = TcpSocket::Listen(m_conf.conf_listen_port, m_conf.conf_listen_ip.c_str(), m_conf.conf_back_log);
-	if(fd < 0)
-	{
-		LOG_ERROR(logger, "AccessSvr:listen on ip="<<m_conf.conf_listen_ip<<":"<<m_conf.conf_listen_port
-					<<" failed.errno="<<errno<<"("<<strerror(errno)<<")");
-		return -2;
-	}
-
-	m_listen_fd = fd;
-	m_acceptor.Init(GetIOServer(), m_listen_fd, &m_client_session_mgr);
-
-	LOG_INFO(logger, "AccessSvr:DoListen succ.listen on ip="<<m_conf.conf_listen_ip<<":"<<m_conf.conf_listen_port<<".fd="<<fd);
-	return 0;
+    listen_info.session_mgr = &m_client_session_mgr;
+    InitSessionMgr(&m_client_session_mgr, *client_listen_param);  //初始化listen session mgr
+    m_client_session_mgr.Init(GetIOServer(), packet, listen_info.fd);
 }
 
 bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
@@ -162,3 +125,7 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     }
 }
 
+IOStatus AccessSvr::OnClientError(ClientTCPSession *session, uint64_t now_ms)
+{
+	return IO_ERROR;
+}

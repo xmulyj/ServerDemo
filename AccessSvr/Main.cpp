@@ -10,17 +10,21 @@
 
 #include "AccessSvr.h"
 
+const char CONF_NAME[]="../conf/TCPServer.conf";
+
 int main()
 {
     INIT_LOGGER("../conf/log4cplus.conf");
-    ConfReader conf;
-    if(conf.Init("../conf/TCPServer.conf") != 0)
-        return -1;
-    ConfReader access_conf;
-    if(access_conf.Init("../conf/AccessSvr.conf") != 0)
-        return -1;
 
-    AccessSvr server(&conf, &access_conf);
+    ConfReader conf;
+    if(conf.Init(CONF_NAME) != 0)
+    {
+    	string ErrMsg = conf.GetErrMsg();
+    	printf("Init conf=%s failed.ErrMsg=%s\n", CONF_NAME,  ErrMsg.c_str());
+    	return -1;
+    }
+
+    AccessSvr server(&conf);
     if(server.Init() != 0)
         return -1;
 
