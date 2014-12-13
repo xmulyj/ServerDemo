@@ -10,12 +10,19 @@
 
 #include "LogicSvr.h"
 
+const char CONF_NAME[]="../conf/TCPServer.conf";
+
 int main()
 {
     INIT_LOGGER("../conf/log4cplus.conf");
+
     ConfReader conf;
-    if(conf.Init("../conf/TCPServer.conf") != 0)
-        return -1;
+    if(conf.Init(CONF_NAME) != 0)
+    {
+    	string ErrMsg = conf.GetErrMsg();
+    	printf("Init conf=%s failed.ErrMsg=%s\n", CONF_NAME,  ErrMsg.c_str());
+    	return -1;
+    }
 
     LogicSvr server(&conf);
     if(server.Init() != 0)

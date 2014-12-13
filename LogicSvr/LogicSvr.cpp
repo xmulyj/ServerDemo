@@ -81,7 +81,7 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
     add_name_req.set_uid(register_req.uid());
     add_name_req.set_name(register_req.name());
 
-    int ret = ReqSvr(this, this, CMD_ADD_NAME_REQ, &add_name_req, tid);
+    int ret = ReqSvr(this, this, CMD_ADD_NAME_REQ, &add_name_req, tid, TRACTION_SAVE);
     if(ret != 0)
     {
         LOG_ERROR(logger, "OnRegister:send AddNameReq failed.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
@@ -92,23 +92,11 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
     	LOG_DEBUG(logger, "OnRegister:send AddNameReq succ.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
     }
 
-    if(SaveTractionSession(tid, session) == false)
-    {
-        LOG_ERROR(logger, "OnRegister:save traction session failed.tid="<<tid);
-        return -1;
-    }
     return 0;
 }
 
 int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
-    TCPSession *rsp_session = GetTractionSession(tid, true);  //获取tid对应的session(true:并删除掉该事务)
-    if(rsp_session == NULL)
-    {
-        LOG_WARN(logger, "OnAddNameRsp:get traction session failed.tid="<<tid);
-        return -1;
-    }
-
     AddNameRsp add_name_rsp;
     if(add_name_rsp.ParseFromArray(data+head_size, body_size) == false)
     {
@@ -120,7 +108,7 @@ int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_
     //回包
     RegisterRsp register_rsp;
     register_rsp.set_ret(add_name_rsp.ret());
-    int ret = RspSvr((SessionDefault*)rsp_session, CMD_REGISTER_RSP, &register_rsp, tid);
+    int ret = RspSvr(this, CMD_REGISTER_RSP, &register_rsp, tid);
     if(ret != 0)
     {
         LOG_WARN(logger, "OnAddNameRsp:send RegisterRsp failed.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());

@@ -14,21 +14,44 @@ using namespace enet;
 #include <google/protobuf/message.h>
 using namespace ::google::protobuf;
 
+typedef enum
+{
+	TRACTION_SAVE,
+	TRACTION_NO_SAVE
+}SaveTractionType;
+
 class CommonSend
 {
 public:
     int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
-    int SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid);
     int SendToSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
 
-    int ReqSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid)  //直接按cmd路由
+    int ReqSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid, SaveTractionType s=TRACTION_NO_SAVE)  //直接按cmd路由
     {
         SessionDefault *session = route_server->GetSvrSession(tcp_server, cmd);
+    	if(s == TRACTION_SAVE)
+    	{
+    		if(tcp_server->SaveTraction(tid, session))
+    		{
+    			return -99999;
+    		}
+    	}
         return SendToSvr(session, cmd, msg, tid);
     }
+
     int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
     {
         return SendToSvr(session, cmd, msg, tid);
+    }
+
+    int RspSvr(TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid)
+    {
+    	SessionDefault* session = dynamic_cast<SessionDefault*>(tcp_server->GetTraction(tid, true));
+    	if(session == NULL)
+    	{
+    		return -99999;
+    	}
+    	return SendToSvr(session, cmd, msg, tid);
     }
 };
 
@@ -53,15 +76,6 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, u
     send_byte_buffer.AddSize(head_size+body_size);
     //异步发送
     return session->AsyncSend()?0:-4;
-}
-
-inline
-int CommonSend::SendToSvr(TCPServer *server, int fd, uint32_t cmd, Message *msg, uint64_t tid)
-{
-    //获取会话和byte buffer
-    SessionMgr *session_mgr = server->GetInternalSessionMgr();
-    SessionDefault *session = dynamic_cast<SessionDefault*>(session_mgr->FindSession(fd));
-    return SendToSvr(session, cmd, msg, tid);
 }
 
 inline
