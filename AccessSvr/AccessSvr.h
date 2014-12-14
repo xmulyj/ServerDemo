@@ -17,8 +17,6 @@ using namespace enet;
 #include <map>
 using std::map;
 
-#include "AccessSvrConf.h"
-
 class ClientTCPSession:public SessionDefault
 {
 protected:

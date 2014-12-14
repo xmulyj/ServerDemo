@@ -81,6 +81,7 @@ void AccessSvr::OnListenSucc(ListenInfo &listen_info)
     listen_info.session_mgr = &m_client_session_mgr;
     InitSessionMgr(&m_client_session_mgr, *client_listen_param);  //初始化listen session mgr
     m_client_session_mgr.Init(GetIOServer(), packet, listen_info.fd);
+    LOG_INFO(logger, "AccessSvr:OnListenSucc. id="<<client_listen_param->id<<",ip="<<client_listen_param->ip<<":"<<client_listen_param->port);
 }
 
 bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
