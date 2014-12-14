@@ -35,7 +35,10 @@ public:
 	}
 
 protected:
+    // @override
     int OnInit(ConfReader *config);
+
+    // @override
     bool OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid);
 
     //转发客户端请求
@@ -57,7 +60,9 @@ private:
     //HANLDER_TYPE OnExample;
 private:
     SessionMgrDefault<ClientTCPSession> m_client_session_mgr;
-    void OnListenSucc(ListenInfo &listen_info);
+
+    // @override
+    void OnListenSucc(ListenInfo &listen_info, const ConfSessionParam &session_param);
 private:
     DECL_LOGGER(logger);
 };

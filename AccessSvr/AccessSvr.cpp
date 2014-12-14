@@ -22,22 +22,22 @@ int AccessSvr::OnInit(ConfReader *config)
 {
 //需要路由功能的话请设置为1
 #if 1    //路由规则
-	string conf_route_file;
-	config->GetValue("TCP_SERVER", "route_conf", conf_route_file);
-	if(conf_route_file == "")
-	{
-		LOG_ERROR(logger, "OnInit:[TCP_SERVER]route_conf not set");
-		return -1;
-	}
-	int ret = LoadRouteConf(conf_route_file.c_str());
-	if(ret != 0)
-	{
-		LOG_ERROR(logger, "OnInit:LoadRouteConf failed.ret="<<ret);
-		return -1;
-	}
+    string conf_route_file;
+    config->GetValue("TCP_SERVER", "route_conf", conf_route_file);
+    if(conf_route_file == "")
+    {
+        LOG_ERROR(logger, "OnInit:[TCP_SERVER]route_conf not set");
+        return -1;
+    }
+    int ret = LoadRouteConf(conf_route_file.c_str());
+    if(ret != 0)
+    {
+        LOG_ERROR(logger, "OnInit:LoadRouteConf failed.ret="<<ret);
+        return -1;
+    }
 #endif
 
-	//添加CmdID对应的handler
+    //添加CmdID对应的handler
     HANDLE_CLASS(AccessSvr)
     //HANDLE_CMD(CMD_EXAMPLE_ID, OnExample)
     //从这里添加其他handler
@@ -51,53 +51,53 @@ int AccessSvr::OnInit(ConfReader *config)
 
 bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
-	if(TCPServer::HaveHandler(cmd))
+    if(TCPServer::HaveHandler(cmd))
     {
         //由父类来处理
         TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size, tid);
         return true;
     }
 
-	//查找请求的session
-	ClientTCPSession *client_session = dynamic_cast<ClientTCPSession*>(GetTraction(tid, true));
-	if(client_session == NULL)
-	{
-		LOG_WARN(logger, "AccessSvr:OnPacket| not find client session for tid="<<tid);
-		return true;
-	}
+    //查找请求的session
+    ClientTCPSession *client_session = dynamic_cast<ClientTCPSession*>(GetTraction(tid, true));
+    if(client_session == NULL)
+    {
+        LOG_WARN(logger, "AccessSvr:OnPacket| not find client session for tid="<<tid);
+        return true;
+    }
 
-	//重新打包
-	Packet* packet = client_session->GetPacket(); assert(packet != NULL);
-	ByteBuffer& send_byte_buffer = client_session->GetSendBuffer();
-	int client_body_size = body_size;
-	char* buffer = send_byte_buffer.RemainBuffer(client_body_size+100);
-	if(buffer == NULL)
-	{
-		LOG_ERROR(logger, "AccessSvr:OnPacket| get remain buffer return NULL.cmd="<<cmd);
-		return false;
-	}
-	int client_head_size = packet->SetHead(buffer, 100, client_body_size, cmd, NULL);
-	if(client_head_size <= 0)
-	{
-		LOG_ERROR(logger, "AccessSvr:OnPacket| set head return failed.cmd="<<cmd);
-		return false;
-	}
-	memcpy(buffer+client_head_size, packet_data+head_size, client_body_size);
-	send_byte_buffer.AddSize(client_head_size+client_body_size);
+    //重新打包
+    Packet* packet = client_session->GetPacket(); assert(packet != NULL);
+    ByteBuffer& send_byte_buffer = client_session->GetSendBuffer();
+    int client_body_size = body_size;
+    char* buffer = send_byte_buffer.RemainBuffer(client_body_size+100);
+    if(buffer == NULL)
+    {
+        LOG_ERROR(logger, "AccessSvr:OnPacket| get remain buffer return NULL.cmd="<<cmd);
+        return false;
+    }
+    int client_head_size = packet->SetHead(buffer, 100, client_body_size, cmd, NULL);
+    if(client_head_size <= 0)
+    {
+        LOG_ERROR(logger, "AccessSvr:OnPacket| set head return failed.cmd="<<cmd);
+        return false;
+    }
+    memcpy(buffer+client_head_size, packet_data+head_size, client_body_size);
+    send_byte_buffer.AddSize(client_head_size+client_body_size);
 
-	//异步发送
-	if(client_session->AsyncSend() == true)
-	{
-		LOG_INFO(logger, "AccessSvr:OnPacket| send to client succ.cmd="<<cmd<<",tid="<<tid);
-		return true;
-	}
-	else
-	{
-		LOG_ERROR(logger, "AccessSvr:OnPacket| send to client failed.cmd="<<cmd);
-		return false;
-	}
+    //异步发送
+    if(client_session->AsyncSend() == true)
+    {
+        LOG_INFO(logger, "AccessSvr:OnPacket| send to client succ.cmd="<<cmd<<",tid="<<tid);
+        return true;
+    }
+    else
+    {
+        LOG_ERROR(logger, "AccessSvr:OnPacket| send to client failed.cmd="<<cmd);
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 //int AccessSvr::OnExample(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid)
@@ -106,35 +106,31 @@ bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_d
 //    return 0;
 //}
 
-void AccessSvr::OnListenSucc(ListenInfo &listen_info)
+void AccessSvr::OnListenSucc(ListenInfo &listen_info, const ConfSessionParam &session_param)
 {
     //listen id=0内部使用
     int listen_id = listen_info.id;
-    TCPServerConf &tcp_conf = GetTCPConf();
-    const ConfSessionParam *client_listen_param = tcp_conf.GetListenParam(listen_id);
     Packet *packet = GetInternalPacket();
-    assert(client_listen_param!=NULL && packet!=NULL);
+    assert(packet != NULL);
 
     listen_info.session_mgr = &m_client_session_mgr;
-    InitSessionMgr(&m_client_session_mgr, *client_listen_param);  //初始化listen session mgr
+    InitSessionMgr(&m_client_session_mgr, session_param);  //初始化listen session mgr
     m_client_session_mgr.Init(GetIOServer(), packet, listen_info.fd);
-    LOG_INFO(logger, "AccessSvr:OnListenSucc. id="<<client_listen_param->id<<",ip="<<client_listen_param->ip<<":"<<client_listen_param->port);
+    LOG_INFO(logger, "AccessSvr:OnListenSucc. id="<<session_param.id<<",ip="<<session_param.ip<<":"<<session_param.port);
 }
 
 bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
-	//重新打包转发给内部server
-	tid = GUID::Get(GetTCPServerConf()->conf_svr_index);
-	SessionDefault *svr_session = GetSvrSession(this, cmd);
-	if(svr_session == NULL)
-	{
-		LOG_ERROR(logger, "AccessSvr:OnClientPacket| get svr session return NULL.cmd="<<cmd);
-		return false;
-	}
+    //重新打包转发给内部server
+    SessionDefault *svr_session = GetSvrSession(this, cmd);
+    if(svr_session == NULL)
+    {
+        LOG_ERROR(logger, "AccessSvr:OnClientPacket| get svr session return NULL.cmd="<<cmd);
+        return false;
+    }
 
-	//创建tid
-	TCPServerConf *tcp_conf = GetTCPServerConf();
-	tid = GUID::Get(tcp_conf->conf_svr_index);
+    //生成tid
+    tid = GUID::Get(GetTCPServerConf().conf_svr_index);
 
     //序列化
     Packet* packet = svr_session->GetPacket(); assert(packet != NULL);
@@ -143,14 +139,14 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     char* buffer = send_byte_buffer.RemainBuffer(internal_body_size+100);
     if(buffer == NULL)
     {
-    	LOG_ERROR(logger, "AccessSvr:OnClientPacket| get remain buffer return NULL.cmd="<<cmd);
+        LOG_ERROR(logger, "AccessSvr:OnClientPacket| get remain buffer return NULL.cmd="<<cmd);
         return false;
     }
     int internal_head_size = packet->SetHead(buffer, 100, internal_body_size, cmd, &tid);
     if(internal_head_size <= 0)
     {
-    	LOG_ERROR(logger, "AccessSvr:OnClientPacket| set head return failed.cmd="<<cmd);
-    	return false;
+        LOG_ERROR(logger, "AccessSvr:OnClientPacket| set head return failed.cmd="<<cmd);
+        return false;
     }
     memcpy(buffer+internal_head_size, packet_data+head_size, internal_body_size);
     send_byte_buffer.AddSize(internal_head_size+internal_body_size);
@@ -158,30 +154,30 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     //异步发送
     if(svr_session->AsyncSend() == true)
     {
-    	LOG_INFO(logger, "AccessSvr:OnClientPacket| send to svr succ.cmd="<<cmd);
+        LOG_INFO(logger, "AccessSvr:OnClientPacket| send to svr succ.cmd="<<cmd);
     }
     else
     {
-    	LOG_ERROR(logger, "AccessSvr:OnClientPacket| send to svr failed.cmd="<<cmd);
-    	return false;
+        LOG_ERROR(logger, "AccessSvr:OnClientPacket| send to svr failed.cmd="<<cmd);
+        return false;
     }
 
     //保存session
     int ret = SaveTraction(tid, session);
     if(ret != 0)
     {
-    	LOG_ERROR(logger, "AccessSvr:OnClientPacket| save traction failed.tid="<<tid);
+        LOG_ERROR(logger, "AccessSvr:OnClientPacket| save traction failed.tid="<<tid);
         return false;
     }
     else
     {
-    	LOG_DEBUG(logger, "AccessSvr:OnClientPacket| save traction succ.tid="<<tid<<",session="<<session);
+        LOG_DEBUG(logger, "AccessSvr:OnClientPacket| save traction succ.tid="<<tid<<",session="<<session);
     }
     return true;
 }
 
 IOStatus AccessSvr::OnClientError(ClientTCPSession *session, uint64_t now_ms)
 {
-	LOG_WARN(logger, "AccessSvr:OnClientError|");
-	return IO_ERROR;
+    LOG_WARN(logger, "AccessSvr:OnClientError|");
+    return IO_ERROR;
 }
