@@ -19,3 +19,5 @@ bin/LogicSvr:Main.cpp LogicSvr.cpp LogicSvr.h
 
 clean:
 	rm bin/LogicSvr
+
+rebuild:clean all

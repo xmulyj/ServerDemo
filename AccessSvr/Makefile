@@ -19,3 +19,5 @@ bin/AccessSvr:Main.cpp AccessSvr.cpp AccessSvr.h
 
 clean:
 	rm bin/AccessSvr
+
+rebuild:clean all

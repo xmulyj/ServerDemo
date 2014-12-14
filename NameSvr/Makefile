@@ -19,3 +19,5 @@ bin/NameSvr:Main.cpp NameSvr.cpp NameSvr.h
 
 clean:
 	rm bin/NameSvr
+
+rebuild:clean all

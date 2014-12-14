@@ -88,7 +88,7 @@ bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_d
 	//异步发送
 	if(client_session->AsyncSend() == true)
 	{
-		LOG_INFO(logger, "AccessSvr:OnPacket| send to client succ.cmd="<<cmd);
+		LOG_INFO(logger, "AccessSvr:OnPacket| send to client succ.cmd="<<cmd<<",tid="<<tid);
 		return true;
 	}
 	else
@@ -159,7 +159,6 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     if(svr_session->AsyncSend() == true)
     {
     	LOG_INFO(logger, "AccessSvr:OnClientPacket| send to svr succ.cmd="<<cmd);
-    	return true;
     }
     else
     {
@@ -174,7 +173,10 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     	LOG_ERROR(logger, "AccessSvr:OnClientPacket| save traction failed.tid="<<tid);
         return false;
     }
-
+    else
+    {
+    	LOG_DEBUG(logger, "AccessSvr:OnClientPacket| save traction succ.tid="<<tid<<",session="<<session);
+    }
     return true;
 }
 
