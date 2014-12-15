@@ -32,6 +32,7 @@ int NameSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
+    CommondSend::Init(this, this);
     
     //4. 注册cmd处理方法
     HANDLE_CLASS(NameSvr)
