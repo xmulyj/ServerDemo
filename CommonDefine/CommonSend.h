@@ -30,7 +30,7 @@ public:
     int SendToSvr(uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
 
     //发送请求.直接按cmd路由
-    int ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL);
+    int ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL, uint32_t req_timeout=5);
     //发送回复.往session发送回复包
     int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
     //发送回复.直接按cmd路由
@@ -72,11 +72,11 @@ int CommonSend::SendToSvr(uint32_t cmd, Message *msg, uint32_t svr_id, TCPServer
 }
 
 inline
-int CommonSend::ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL)  //直接按cmd路由
+int CommonSend::ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session/*=NULL*/, uint32_t req_timeout/*=5*/)  //直接按cmd路由
 {
 	if(req_session != NULL)
 	{
-		if(m_tcp_svr->SaveTraction(tid, req_session))
+		if(m_tcp_svr->SaveTraction(tid, req_session, req_timeout))
 		{
 			return -99999;
 		}
