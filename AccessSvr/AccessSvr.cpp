@@ -36,6 +36,7 @@ int AccessSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
+    CommondSend::Init(this, this);
 
     //添加CmdID对应的handler
     HANDLE_CLASS(AccessSvr)
