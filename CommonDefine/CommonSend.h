@@ -17,36 +17,27 @@ using namespace ::google::protobuf;
 class CommonSend
 {
 public:
+    CommonSend():m_tcp_svr(NULL),m_route_svr(NULL){}
+    void Init(TCPServer *tcp_svr, TCPServerRoute *route_svr)
+    {
+        m_tcp_svr = tcp_svr;
+        m_route_svr = route_svr;
+    }
+    
+    //发送数据到svr.根据session发送
     int SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
-    int SendToSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
+    //发送数据到svr.指定svr_id和路由方式选择对应的session
+    int SendToSvr(uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid);
 
-    int ReqSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL)  //直接按cmd路由
-    {
-    	if(req_session != NULL)
-    	{
-    		if(tcp_server->SaveTraction(tid, req_session))
-    		{
-    			return -99999;
-    		}
-    	}
-    	SessionDefault *session = route_server->GetSvrSession(tcp_server, cmd);
-        return SendToSvr(session, cmd, msg, tid);
-    }
-
-    int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
-    {
-        return SendToSvr(session, cmd, msg, tid);
-    }
-
-    int RspSvr(TCPServer *tcp_server, uint32_t cmd, Message *msg, uint64_t tid)
-    {
-    	SessionDefault* session = dynamic_cast<SessionDefault*>(tcp_server->GetTraction(tid, true));
-    	if(session == NULL)
-    	{
-    		return -99999;
-    	}
-    	return SendToSvr(session, cmd, msg, tid);
-    }
+    //发送请求.直接按cmd路由
+    int ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL);
+    //发送回复.往session发送回复包
+    int RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid);
+    //发送回复.直接按cmd路由
+    int RspSvr(uint32_t cmd, Message *msg, uint64_t tid);
+private:
+    TCPServer *m_tcp_svr;
+    TCPServerRoute *route_svr;
 };
 
 inline
@@ -73,11 +64,41 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, u
 }
 
 inline
-int CommonSend::SendToSvr(TCPServerRoute *route_server, TCPServer *tcp_server, uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
+int CommonSend::SendToSvr(uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
 {
     //获取会话和byte buffer
-    SessionDefault *session = route_server->GetSvrSession(tcp_server, svr_id, route_type);
+    SessionDefault *session = m_route_svr->GetSvrSession(m_tcp_server, svr_id, route_type);
     return SendToSvr(session, cmd, msg, tid);
 }
 
+inline
+int CommonSend::ReqSvr(uint32_t cmd, Message *msg, uint64_t tid, SessionDefault *req_session=NULL)  //直接按cmd路由
+{
+	if(req_session != NULL)
+	{
+		if(m_tcp_svr->SaveTraction(tid, req_session))
+		{
+			return -99999;
+		}
+	}
+	SessionDefault *session = m_route_svr->GetSvrSession(m_tcp_svr, cmd);
+    return SendToSvr(session, cmd, msg, tid);
+}
+
+inline
+int CommonSend::RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint64_t tid)
+{
+    return SendToSvr(session, cmd, msg, tid);
+}
+
+inline
+int RspSvr(uint32_t cmd, Message *msg, uint64_t tid)
+{
+	SessionDefault* session = dynamic_cast<SessionDefault*>(m_tcp_svr->GetTraction(tid, true));
+	if(session == NULL)
+	{
+		return -99999;
+	}
+	return SendToSvr(session, cmd, msg, tid);
+}
 #endif /* COMMONSEND_H_ */
