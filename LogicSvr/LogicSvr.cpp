@@ -37,7 +37,7 @@ int LogicSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
-    CommondSend::Init(this, this);
+    SetServer(this, this);
     
     //添加CmdID对应的handler
     HANDLE_CLASS(LogicSvr)

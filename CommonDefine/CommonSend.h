@@ -18,7 +18,7 @@ class CommonSend
 {
 public:
     CommonSend():m_tcp_svr(NULL),m_route_svr(NULL){}
-    void Init(TCPServer *tcp_svr, TCPServerRoute *route_svr)
+    void SetServer(TCPServer *tcp_svr, TCPServerRoute *route_svr)
     {
         m_tcp_svr = tcp_svr;
         m_route_svr = route_svr;
@@ -37,7 +37,7 @@ public:
     int RspSvr(uint32_t cmd, Message *msg, uint64_t tid);
 private:
     TCPServer *m_tcp_svr;
-    TCPServerRoute *route_svr;
+    TCPServerRoute *m_route_svr;
 };
 
 inline
@@ -54,7 +54,7 @@ int CommonSend::SendToSvr(SessionDefault *session, uint32_t cmd, Message *msg, u
     {
         return -2;
     }
-    int head_size = packet->SetHead(buffer, 100, body_size, cmd, &tid);
+    int head_size = packet->SetHead(buffer, 100, body_size, cmd, tid);
     if(head_size <= 0)
         return -3;
     msg->SerializePartialToArray(buffer+head_size, body_size);
@@ -67,7 +67,7 @@ inline
 int CommonSend::SendToSvr(uint32_t cmd, Message *msg, uint32_t svr_id, TCPServerRoute::RouteType route_type, uint64_t tid)
 {
     //获取会话和byte buffer
-    SessionDefault *session = m_route_svr->GetSvrSession(m_tcp_server, svr_id, route_type);
+    SessionDefault *session = m_route_svr->GetSvrSession(m_tcp_svr, svr_id, route_type);
     return SendToSvr(session, cmd, msg, tid);
 }
 
@@ -92,7 +92,7 @@ int CommonSend::RspSvr(SessionDefault *session, uint32_t cmd, Message *msg, uint
 }
 
 inline
-int RspSvr(uint32_t cmd, Message *msg, uint64_t tid)
+int CommonSend::RspSvr(uint32_t cmd, Message *msg, uint64_t tid)
 {
 	SessionDefault* session = dynamic_cast<SessionDefault*>(m_tcp_svr->GetTraction(tid, true));
 	if(session == NULL)

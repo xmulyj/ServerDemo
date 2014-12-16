@@ -36,7 +36,6 @@ int AccessSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
-    CommondSend::Init(this, this);
 
     //添加CmdID对应的handler
     HANDLE_CLASS(AccessSvr)
@@ -77,7 +76,7 @@ bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_d
         LOG_ERROR(logger, "AccessSvr:OnPacket| get remain buffer return NULL.cmd="<<cmd);
         return false;
     }
-    int client_head_size = packet->SetHead(buffer, 100, client_body_size, cmd, NULL);
+    int client_head_size = packet->SetHead(buffer, 100, client_body_size, cmd);
     if(client_head_size <= 0)
     {
         LOG_ERROR(logger, "AccessSvr:OnPacket| set head return failed.cmd="<<cmd);
@@ -143,7 +142,7 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| get remain buffer return NULL.cmd="<<cmd);
         return false;
     }
-    int internal_head_size = packet->SetHead(buffer, 100, internal_body_size, cmd, &tid);
+    int internal_head_size = packet->SetHead(buffer, 100, internal_body_size, cmd, tid);
     if(internal_head_size <= 0)
     {
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| set head return failed.cmd="<<cmd);
@@ -164,7 +163,7 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
     }
 
     //保存session
-    int ret = SaveTraction(tid, session);
+    int ret = SaveTraction(tid, session, 5);
     if(ret != 0)
     {
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| save traction failed.tid="<<tid);
