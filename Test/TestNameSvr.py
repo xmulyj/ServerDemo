@@ -1,9 +1,10 @@
 import sys
 import socket
 import struct
+from ctypes import c_longlong as longlong
 
 from sys import path
-path.append("../protocol_define")
+path.append("../ProtocolDefine")
 path.append("./")
 
 from Common import *
@@ -19,7 +20,8 @@ def Test_AddName():
 	
 	REQ.uid=10000
 	REQ.name="TestName"
-	ReqAndRsp(SVR_ADDR, CMD, REQ, RSP)
+	TID=longlong(0)
+	ReqAndRspTid(SVR_ADDR, CMD, REQ, RSP, TID)
 	print "-----------------------------"
 
 def Test_DelName():
@@ -30,7 +32,8 @@ def Test_DelName():
 
 	REQ.uid=10000
 	REQ.name="TestName"
-	ReqAndRsp(SVR_ADDR, CMD, REQ, RSP)
+	TID=longlong(0)
+	ReqAndRspTid(SVR_ADDR, CMD, REQ, RSP, TID)
 	print "-----------------------------"
 
 #########################################
