@@ -21,6 +21,9 @@ IMPL_LOGGER(LogicSvr, logger);
 
 int LogicSvr::OnInit(ConfReader *config)
 {
+    //注册Cmd处理方法
+    CALL_HANDLE_REG();
+
 //需要路由功能的话请设置为1
 #if 1    //路由规则
     string conf_route_file;
@@ -37,19 +40,9 @@ int LogicSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
-    SetServer(this, this);
-    
-    //添加CmdID对应的handler
-    HANDLE_CLASS(LogicSvr)
-    //注册
-    HANDLE_CMD(CMD_REGISTER_REQ, OnRegister)
-    HANDLE_CMD(CMD_ADD_NAME_RSP, OnAddNameRsp)
-
-	//
-    HANDLE_CLASS_END
-
 
     //添加其他初始化内容
+    SetServer(this, this);
 
     return 0;
 }

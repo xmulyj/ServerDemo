@@ -4,18 +4,11 @@ import time
 import struct
 from ctypes import c_longlong as longlong
 
-
 def PackHead(cmd, body_size, tid, ret):
 	MAGIC_NUM="PACK"
 	tid_=longlong(tid)
 	head=struct.pack("!4s3i1q",MAGIC_NUM, ret, body_size, cmd, tid_.value)
 	return head
-
-def PackMsg(cmd, msg, tid):
-	size=msg.ByteSize()
-	send_buf=PackHead(cmd, size, tid, 0)
-	send_buf += msg.SerializeToString()
-	return send_buf
 
 def SendData(svr_addr, data):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,6 +25,14 @@ def SendAndRecvData(svr_addr, data):
 	recv_data = sock.recv(65536)
 	sock.close()
 	return recv_data
+
+
+### pb message ###
+def PackMsg(cmd, msg, tid):
+	size=msg.ByteSize()
+	send_buf=PackHead(cmd, size, tid, 0)
+	send_buf += msg.SerializeToString()
+	return send_buf
 
 def ReqAndRsp(SVR_ADDR, CMD, REQ, RSP, TID):
 	#2. serialize

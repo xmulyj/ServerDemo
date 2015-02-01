@@ -16,6 +16,9 @@ IMPL_LOGGER(NameSvr, logger);
 
 int NameSvr::OnInit(ConfReader *config)
 {
+    //注册Cmd处理方法
+    CALL_HANDLE_REG();
+
 //需要路由功能的话请设置为1
 #if 0    //路由规则
     string conf_route_file;
@@ -32,13 +35,9 @@ int NameSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
+
+    //添加其他初始化内容
     SetServer(this, this);
-    
-    //4. 注册cmd处理方法
-    HANDLE_CLASS(NameSvr)
-    HANDLE_CMD(CMD_ADD_NAME_REQ, OnAddNameReq)
-    HANDLE_CMD(CMD_DEL_NAME_REQ, OnDelNameReq)
-    HANDLE_CLASS_END;
 
     return 0;
 }

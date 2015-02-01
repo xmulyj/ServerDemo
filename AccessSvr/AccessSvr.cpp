@@ -20,6 +20,9 @@ static HttpPacket gHttpPack;
 
 int AccessSvr::OnInit(ConfReader *config)
 {
+    //注册Cmd处理方法
+    CALL_HANDLE_REG();
+
 //需要路由功能的话请设置为1
 #if 1    //路由规则
     string conf_route_file;
@@ -36,13 +39,6 @@ int AccessSvr::OnInit(ConfReader *config)
         return -1;
     }
 #endif
-
-    //添加CmdID对应的handler
-    HANDLE_CLASS(AccessSvr)
-    //HANDLE_CMD(CMD_EXAMPLE_ID, OnExample)
-    //从这里添加其他handler
-    HANDLE_CLASS_END
-
 
     //添加其他初始化内容
 

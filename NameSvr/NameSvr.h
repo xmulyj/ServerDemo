@@ -35,10 +35,14 @@ private:
     typedef int HANDLER_TYPE(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
     // handler指针类型定义
     typedef int (NameSvr::*HANLDER_PTR)(TCPSession *session, const char *data, uint32_t head_size, uint32_t body_size, uint64_t tid);
-    DEF_HANDLE(uint32_t, HANLDER_PTR);
     // 声明handler方法
     HANDLER_TYPE OnAddNameReq;    //添加名称
     HANDLER_TYPE OnDelNameReq;    //删除名称
+
+    HANDLE_REG(NameSvr, uint32_t, HANLDER_PTR)
+    HANDLE_CMD(CMD_ADD_NAME_REQ, OnAddNameReq)
+	HANDLE_CMD(CMD_DEL_NAME_REQ, OnDelNameReq)
+    HANDLE_REG_END
 private:
     DECL_LOGGER(logger);
 };
