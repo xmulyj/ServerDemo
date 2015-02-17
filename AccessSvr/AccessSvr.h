@@ -73,9 +73,9 @@ private:
 inline
 bool ClientTCPSession::OnPacket(uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
-	AccessSvr* tcp_server = (AccessSvr*)GetUserData();
-    assert(tcp_server != NULL);
-    return tcp_server->OnClientPacket(this, cmd, packet_data, head_size, body_size, tid);
+	AccessSvr* access_server = (AccessSvr*)GetUserData();
+    assert(access_server != NULL);
+    return access_server->OnClientPacket(this, cmd, packet_data, head_size, body_size, tid);
 }
 
 inline
