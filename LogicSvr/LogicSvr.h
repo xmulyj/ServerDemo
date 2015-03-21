@@ -17,7 +17,7 @@ using namespace enet;
 #include "CmdID.h"
 #include "CommonSend.h"
 
-class LogicSvr:public TCPServer, public TCPServerRoute, public CommonSend
+class LogicSvr:public TCPServer, public CommonSend
 {
 public:
     LogicSvr(ConfReader *conf):TCPServer(conf){}

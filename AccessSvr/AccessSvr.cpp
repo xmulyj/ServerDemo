@@ -23,23 +23,6 @@ int AccessSvr::OnInit(ConfReader *config)
     //注册Cmd处理方法
     CALL_HANDLE_REG();
 
-//需要路由功能的话请设置为1
-#if 1    //路由规则
-    string conf_route_file;
-    config->GetValue("TCP_SERVER", "route_conf", conf_route_file);
-    if(conf_route_file == "")
-    {
-        LOG_ERROR(logger, "OnInit:[TCP_SERVER]route_conf not set");
-        return -1;
-    }
-    int ret = LoadRouteConf(conf_route_file.c_str());
-    if(ret != 0)
-    {
-        LOG_ERROR(logger, "OnInit:LoadRouteConf failed.ret="<<ret);
-        return -1;
-    }
-#endif
-
     //添加其他初始化内容
 
     return 0;
@@ -118,7 +101,7 @@ void AccessSvr::OnListenSucc(ListenInfo &listen_info, const ConfSessionParam &se
 bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)
 {
     //重新打包转发给内部server
-    SessionDefault *svr_session = GetSvrSession(this, cmd);
+    SessionDefault *svr_session = dynamic_cast<SessionDefault*>(ServerGroup_GetSession(cmd));
     if(svr_session == NULL)
     {
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| get svr session return NULL.cmd="<<cmd);

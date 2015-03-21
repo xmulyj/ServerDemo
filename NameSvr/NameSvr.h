@@ -17,7 +17,7 @@ using namespace enet;
 #include "CmdID.h"
 #include "CommonSend.h"
 
-class NameSvr:public TCPServer, public TCPServerRoute, public CommonSend
+class NameSvr:public TCPServer, public CommonSend
 {
 public:
     NameSvr(ConfReader *conf):TCPServer(conf){}

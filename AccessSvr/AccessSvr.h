@@ -26,7 +26,7 @@ protected:
     IOStatus OnError(int fd, uint64_t now_ms); //请不要close掉fd,框架会close的.切记切记!!!
 };
 
-class AccessSvr:public TCPServer, public TCPServerRoute
+class AccessSvr:public TCPServer
 {
 friend class ClientTCPSession;
 public:

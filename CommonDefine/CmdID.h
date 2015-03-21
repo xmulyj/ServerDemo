@@ -8,19 +8,19 @@
 #ifndef CMDID_H_
 #define CMDID_H_
 
-//SvrID=1, AccessSvr
+//SvrID=0, AccessSvr
 
 
-//SvrID=2, LogicSvr
-#define CMD_REGISTER_REQ     2001  //注册
-#define CMD_REGISTER_RSP     2002
+//SvrID=1, LogicSvr
+#define CMD_REGISTER_REQ     0x00010001  //注册
+#define CMD_REGISTER_RSP     0x00010002
 
 
-//SvrID=3, NameSvr
-#define CMD_ADD_NAME_REQ     3001  //添加名字
-#define CMD_ADD_NAME_RSP     3002
-#define CMD_DEL_NAME_REQ     3003  //删除名字
-#define CMD_DEL_NAME_RSP     3004
+//SvrID=2, NameSvr
+#define CMD_ADD_NAME_REQ     0x00020001  //添加名字
+#define CMD_ADD_NAME_RSP     0x00020002
+#define CMD_DEL_NAME_REQ     0x00020003  //删除名字
+#define CMD_DEL_NAME_RSP     0x00020004
 
 
 

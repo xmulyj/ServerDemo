@@ -13,7 +13,7 @@ SVR_ADDR=("127.0.0.1", 3000)
 
 def Test_Register():
 	print "[Test_Register]"
-	CMD = 2001
+	CMD = 0x00010001
 	REQ = LogicSvr_pb2.RegisterReq()
 	RSP = LogicSvr_pb2.RegisterRsp()
 	
