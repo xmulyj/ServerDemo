@@ -51,7 +51,7 @@ bool LogicSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_da
 {
     if(!HAS_HANDLE(cmd))
     {
-        LOG_DEBUG(logger, "can't find handler for cmd="<<cmd<<".fd="<<session->GetFD());
+        //LOG_DEBUG(logger, "can't find handler for cmd="<<cmd<<".fd="<<session->GetFD());
         //由父类来处理
         return TCPServer::OnPacket(session, cmd, packet_data, head_size, body_size, tid);
     }
