@@ -85,17 +85,24 @@ bool AccessSvr::OnPacket(TCPSession *session, uint32_t cmd, const char *packet_d
 //    return 0;
 //}
 
-void AccessSvr::OnListenSucc(ListenInfo &listen_info, const ConfSessionParam &session_param)
+//创建listen成功后调用,需要处理listen_fd的连接事件
+bool AccessSvr::OnListenSucc(uint32_t index, uint32_t listen_fd, const ConfSessionParam &session_param)
 {
-    //listen id=0内部使用
-    int listen_id = listen_info.id;
-    Packet *packet = GetInternalPacket();
-    assert(packet != NULL);
+    LOG_DEBUG(logger, "OnListenSucc|index="<<index);
+    switch(index)
+    {
+    case 0:  //默认是服务器间的通信
+        return TCPServer::OnListenSucc(index, listen_fd, session_param);
+        break;
+    case 1:
+        InitSessionMgr(&m_client_session_mgr, session_param);  //初始化listen session mgr
+        m_client_session_mgr.Init(GetIOServer(), GetInternalPacket(), listen_fd);
+        break;
+    default:
+        return false;
+    }
 
-    listen_info.session_mgr = &m_client_session_mgr;
-    InitSessionMgr(&m_client_session_mgr, session_param);  //初始化listen session mgr
-    m_client_session_mgr.Init(GetIOServer(), packet, listen_info.fd);
-    LOG_INFO(logger, "AccessSvr:OnListenSucc. id="<<session_param.id<<",ip="<<session_param.ip<<":"<<session_param.port);
+    return true;
 }
 
 bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const char *packet_data, uint32_t head_size, uint32_t body_size, uint64_t tid)

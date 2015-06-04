@@ -64,7 +64,7 @@ private:
     SessionMgrDefault<ClientTCPSession> m_client_session_mgr;
 
     // @override
-    void OnListenSucc(ListenInfo &listen_info, const ConfSessionParam &session_param);
+    bool OnListenSucc(uint32_t index, uint32_t listen_fd, const ConfSessionParam &session_param);
 private:
     DECL_LOGGER(logger);
 };
