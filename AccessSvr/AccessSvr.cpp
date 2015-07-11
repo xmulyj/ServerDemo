@@ -128,7 +128,7 @@ bool AccessSvr::OnClientPacket(ClientTCPSession *session, uint32_t cmd, const ch
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| get remain buffer return NULL.cmd="<<cmd);
         return false;
     }
-    int internal_head_size = packet->SetHead(buffer, 100, internal_body_size, cmd, tid);
+    int internal_head_size = packet->SetHead(buffer, 100, internal_body_size, cmd, 0, tid);
     if(internal_head_size <= 0)
     {
         LOG_ERROR(logger, "AccessSvr:OnClientPacket| set head return failed.cmd="<<cmd);

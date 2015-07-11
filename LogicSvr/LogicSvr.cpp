@@ -58,7 +58,7 @@ int LogicSvr::OnRegister(TCPSession *session, const char *data, uint32_t head_si
     add_name_req.set_uid(register_req.uid());
     add_name_req.set_name(register_req.name());
 
-    int ret = ReqSvr(CMD_ADD_NAME_REQ, &add_name_req, tid, session);
+    int ret = ReqSvr(CMD_ADD_NAME_REQ, &add_name_req, 0, tid, session);
     if(ret != 0)
     {
         LOG_ERROR(logger, "OnRegister:send AddNameReq failed.ret="<<ret<<",tid="<<tid<<",req="<<add_name_req.ShortDebugString());
@@ -85,7 +85,7 @@ int LogicSvr::OnAddNameRsp(TCPSession *session, const char *data, uint32_t head_
     //回包
     RegisterRsp register_rsp;
     register_rsp.set_ret(add_name_rsp.ret());
-    int ret = RspSvr(CMD_REGISTER_RSP, &register_rsp, tid);
+    int ret = RspSvr(CMD_REGISTER_RSP, &register_rsp, 0, tid);
     if(ret != 0)
     {
         LOG_WARN(logger, "OnAddNameRsp:send RegisterRsp failed.ret="<<ret<<",tid="<<tid<<",rsp="<<register_rsp.ShortDebugString());
