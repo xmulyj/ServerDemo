@@ -8,7 +8,7 @@ INCLUDE+=-I../CommonDefine -I../ProtocolDefine
 LIBS=-lpthread -lrt -lprotobuf -llog4cplus ${ENET_INSTALL_PREFIX}/lib/libenet.a
 LIBS+=../ProtocolDefine/libproto.a
 
-CFLAGS=-g -D__LOG4CPLUS__
+CFLAGS=-g -D__LOG4CPLUS__ -D__USE_PROTOCOL_BUFF__
 
 all:bin/NameSvr
 
